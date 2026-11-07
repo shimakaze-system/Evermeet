@@ -1,0 +1,97 @@
+name: Build D&D 5e Character Sheet Preview
+
+on:
+  push:
+    branches:
+      - main
+      - "feat/**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-preview:
+    name: Compile Dummy Sheets & Build Preview Site
+    runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.check_pages.outputs.enabled }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Fonts (Roboto, Liberation, DejaVu, Libertinus)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            fonts-roboto \
+            fonts-liberation2 \
+            fonts-dejavu-core \
+            fonts-linuxlibertine
+
+      - name: Setup Typst
+        uses: typst-community/setup-typst@v4
+        with:
+          typst-version: "0.13.1"
+
+      - name: Build Dummy Character Sheets & HTML Preview Page
+        run: |
+          chmod +x scripts/build_preview.sh
+          ./scripts/build_preview.sh
+
+      - name: Upload Preview Site & PDFs Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: character-sheet-preview-site
+          path: dist/
+          retention-days: 30
+
+      - name: Publish Preview Summary to Job Summary
+        run: |
+          cat << 'EOF' >> "$GITHUB_STEP_SUMMARY"
+          ## Evermeet — Automated D&D 5e Character Sheet Preview Built ✅
+
+          The static HTML preview gallery (`dist/index.html`), rendered high-DPI PNG pages (`dist/img/*.png`), and compiled PDFs (`dist/pdf/*.pdf`) have been generated from dummy character data:
+
+          | # | Dummy Character | Class / Subclass | Pages | Source | Compiled PDF |
+          | :-: | :--- | :--- | :-: | :--- | :--- |
+          | **01** | **Seraphina Vale** | Paladin (Oath of Devotion 6) / Warlock (The Celestial 2) | 3 | `character.typ` | `dist/pdf/seraphina_paladin_warlock.pdf` |
+          | **02** | **Kaelen "Whisper" Vane** | Rogue (Arcane Trickster 7) | 3 | `examples/kaelen_rogue.typ` | `dist/pdf/kaelen_rogue.pdf` |
+          | **03** | **Thokk "Ironhide" Grimjaw** | Barbarian (Path of the Totem Warrior 5) | 2 | `examples/thokk_barbarian.typ` | `dist/pdf/thokk_barbarian.pdf` |
+
+          > **Download the `character-sheet-preview-site` artifact** from this workflow run and open `index.html` to browse the interactive preview page.
+          EOF
+
+      - name: Check if GitHub Pages is enabled
+        id: check_pages
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/
+
+  deploy-pages:
+    name: Deploy Preview Page to GitHub Pages
+    needs: build-preview
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-preview.outputs.pages_enabled == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

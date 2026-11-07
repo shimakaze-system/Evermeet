@@ -1,30 +1,34 @@
 # Evermeet — Automated D&D 5e Character Sheet in Typst
 
-A clean, modern minimalist, printer-friendly 3-page **Dungeons & Dragons 5th Edition** character sheet built in [Typst](https://typst.app), featuring an automated 5e rules & calculation engine.
+A clean, modern minimalist, printer-friendly 3-page **Dungeons & Dragons 5th Edition** character sheet built in [Typst](https://typst.app), featuring an automated 5e rules & calculation engine and a GitHub Actions CI preview builder.
 
 ## Quick Start
 
-Compile the character sheet into a PDF using Typst:
+Compile a single character sheet into a PDF using Typst:
 
 ```bash
 typst compile character.typ character.pdf
 ```
 
-Or watch for live changes while editing your character dictionary:
+Or build the full multi-character HTML preview gallery (`dist/index.html`, PNG page renders, and PDFs) locally or in CI:
 
 ```bash
-typst watch character.typ character.pdf
+./scripts/build_preview.sh
 ```
 
 ## Project Structure
 
-- [`character.typ`](character.typ) — Self-contained character definition dictionary (`#let character = (...)`) that invokes `#character-sheet(character)`. Edit this file to create or update your character.
+- [`character.typ`](character.typ) — Showcase character definition (`#let character = (...)`) for **Seraphina Vale** (Level 8 Paladin 6 / Celestial Warlock 2).
+- [`examples/kaelen_rogue.typ`](examples/kaelen_rogue.typ) — Dummy sample character **Kaelen "Whisper" Vane** (Level 7 Arcane Trickster Rogue with 4× Expertise, Observant, Alert, and Third-Caster spell slots).
+- [`examples/thokk_barbarian.typ`](examples/thokk_barbarian.typ) — Dummy sample character **Thokk "Ironhide" Grimjaw** (Level 5 Bear Totem Barbarian demonstrating Unarmored Defense, Tough feat HP, and automatic 2-page non-caster rendering).
 - [`lib/rules.typ`](lib/rules.typ) — Automated D&D 5e calculation & rules engine (`evaluate-character`).
 - [`lib/sheet.typ`](lib/sheet.typ) — Clean Modern Minimalist 3-page layout and modular UI components (`character-sheet`).
+- [`scripts/build_preview.sh`](scripts/build_preview.sh) — Compiles all dummy characters into PDFs and high-DPI PNGs and generates the static HTML preview gallery (`dist/index.html`).
+- [`.github/workflows/preview.yml`](.github/workflows/preview.yml) — GitHub Actions CI workflow that compiles the dummy character sheets, generates the preview site, uploads the `character-sheet-preview-site` artifact, and deploys to GitHub Pages when enabled.
 
 ## Automated 5e Rules & Calculations
 
-Define only your raw ability scores, class levels, equipment, and proficiencies in `character.typ`—the Typst engine automatically computes:
+Define only your raw ability scores, class levels, equipment, and proficiencies—the Typst engine automatically computes:
 
 1. **Level & Proficiency Progression**: Sums single-class or multiclass levels (`total_level`), groups Hit Dice by class die size (`d6`–`d12`), and computes Proficiency Bonus ($\lfloor (\text{Level} - 1)/4 \rfloor + 2$).
 2. **Ability Scores & Modifiers**: Computes $\lfloor (\text{Score} - 10)/2 \rfloor$ with explicit signed formatting (`+3`, `+0`, `−1`).

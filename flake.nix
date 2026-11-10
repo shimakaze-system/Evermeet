@@ -40,6 +40,7 @@
               gnugrep
               gnused
               typst
+              python3
             ];
 
             TYPST_FONT_PATHS = fontPath;
@@ -83,6 +84,7 @@
               gnugrep
               gnused
               typst
+              python3
             ];
             text = ''
               export TYPST_FONT_PATHS="${fontPath}''${TYPST_FONT_PATHS:+:$TYPST_FONT_PATHS}"

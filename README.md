@@ -1,8 +1,25 @@
 # Evermeet — Automated D&D 5e Character Sheet in Typst
 
-A clean, modern minimalist, printer-friendly 3-page **Dungeons & Dragons 5th Edition** character sheet built in [Typst](https://typst.app), featuring an automated 5e rules & calculation engine and a GitHub Actions CI preview builder.
+A clean, modern minimalist, printer-friendly 3-page **Dungeons & Dragons 5th Edition** character sheet built in [Typst](https://typst.app), featuring an automated 5e rules & calculation engine, a Nix Flake local preview environment, and a GitHub Actions CI preview builder.
 
 ## Quick Start
+
+### Local Preview with Nix Flake
+
+A [`flake.nix`](flake.nix) is included with `typst`, all required sheet fonts (`Roboto`, `Libertinus Serif`, `Liberation Sans/Serif/Mono`, `DejaVu Sans/Serif/Mono`), and local preview server helpers:
+
+```bash
+# Build all character cards and launch a local HTTP preview server at http://localhost:8000
+nix run
+
+# Or enter the development shell
+nix develop
+preview-card          # Build & serve dist/ locally at http://localhost:8000
+build-preview         # Compile all character cards & HTML pages into dist/
+watch-card            # Live-compile character.typ -> character.pdf on save
+```
+
+### Manual CLI Build & Local Preview
 
 Compile a single character sheet into a PDF using Typst:
 
@@ -10,21 +27,37 @@ Compile a single character sheet into a PDF using Typst:
 typst compile character.typ character.pdf
 ```
 
-Or build the full multi-character HTML preview gallery (`dist/index.html`, PNG page renders, and PDFs) locally or in CI:
+Or build the full multi-character HTML preview gallery (`dist/index.html`, standalone `<card_name>.html` / `cards/<card_name>.html` pages, PNG page renders, and PDFs) locally or in CI:
 
 ```bash
 ./scripts/build_preview.sh
+
+# Build and immediately serve locally on http://localhost:8000
+./scripts/build_preview.sh --serve 8000
 ```
+
+## Published Character Card Pages
+
+When built locally or deployed to GitHub Pages (`<domain>`), each character card is available both from the main gallery and at its own standalone HTML URL:
+
+| Character Card | Source | Standalone Card URLs |
+| :--- | :--- | :--- |
+| **Seraphina Vale** (Paladin 6 / Warlock 2) | [`character.typ`](character.typ) | `<domain>/seraphina.html` · `<domain>/cards/seraphina.html` · `<domain>/character.html` |
+| **Kaelen "Whisper" Vane** (Arcane Trickster Rogue 7) | [`examples/kaelen_rogue.typ`](examples/kaelen_rogue.typ) | `<domain>/kaelen_rogue.html` · `<domain>/cards/kaelen_rogue.html` · `<domain>/kaelen.html` |
+| **Thokk "Ironhide" Grimjaw** (Totem Barbarian 5) | [`examples/thokk_barbarian.typ`](examples/thokk_barbarian.typ) | `<domain>/thokk_barbarian.html` · `<domain>/cards/thokk_barbarian.html` · `<domain>/thokk.html` |
+
+Any additional `.typ` character files placed in `cards/*.typ` or `examples/*.typ` are also automatically compiled to `dist/<card_name>.html` and `dist/cards/<card_name>.html`.
 
 ## Project Structure
 
+- [`flake.nix`](flake.nix) — Nix Flake providing `typst`, fonts (`TYPST_FONT_PATHS`), `preview-card`, `build-preview`, and `watch-card` for local previewing.
 - [`character.typ`](character.typ) — Showcase character definition (`#let character = (...)`) for **Seraphina Vale** (Level 8 Paladin 6 / Celestial Warlock 2).
 - [`examples/kaelen_rogue.typ`](examples/kaelen_rogue.typ) — Dummy sample character **Kaelen "Whisper" Vane** (Level 7 Arcane Trickster Rogue with 4× Expertise, Observant, Alert, and Third-Caster spell slots).
 - [`examples/thokk_barbarian.typ`](examples/thokk_barbarian.typ) — Dummy sample character **Thokk "Ironhide" Grimjaw** (Level 5 Bear Totem Barbarian demonstrating Unarmored Defense, Tough feat HP, and automatic 2-page non-caster rendering).
 - [`lib/rules.typ`](lib/rules.typ) — Automated D&D 5e calculation & rules engine (`evaluate-character`).
 - [`lib/sheet.typ`](lib/sheet.typ) — Clean Modern Minimalist 3-page layout and modular UI components (`character-sheet`).
-- [`scripts/build_preview.sh`](scripts/build_preview.sh) — Compiles all dummy characters into PDFs and high-DPI PNGs and generates the static HTML preview gallery (`dist/index.html`).
-- [`.github/workflows/preview.yml`](.github/workflows/preview.yml) — GitHub Actions CI workflow that compiles the dummy character sheets, generates the preview site, uploads the `character-sheet-preview-site` artifact, and deploys to GitHub Pages when enabled.
+- [`scripts/build_preview.sh`](scripts/build_preview.sh) — Compiles all character cards into PDFs and high-DPI PNGs and generates `dist/index.html`, `dist/<card_name>.html`, and `dist/cards/<card_name>.html`.
+- [`.github/workflows/preview.yml`](.github/workflows/preview.yml) — GitHub Actions CI workflow that compiles the character sheets, generates the preview site and standalone card pages, uploads the `character-sheet-preview-site` artifact, and deploys to GitHub Pages.
 
 ## Automated 5e Rules & Calculations
 

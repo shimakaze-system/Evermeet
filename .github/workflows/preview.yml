@@ -17,8 +17,6 @@ jobs:
   build-preview:
     name: Compile Dummy Sheets & Build Preview Site
     runs-on: ubuntu-latest
-    outputs:
-      pages_enabled: ${{ steps.check_pages.outputs.enabled }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -54,31 +52,19 @@ jobs:
           cat << 'EOF' >> "$GITHUB_STEP_SUMMARY"
           ## Evermeet — Automated D&D 5e Character Sheet Preview Built ✅
 
-          The static HTML preview gallery (`dist/index.html`), rendered high-DPI PNG pages (`dist/img/*.png`), and compiled PDFs (`dist/pdf/*.pdf`) have been generated from dummy character data:
+          The static HTML preview gallery (`dist/index.html`), standalone card pages (`dist/<card_name>.html` & `dist/cards/<card_name>.html`), rendered high-DPI PNG pages (`dist/img/*.png`), and compiled PDFs (`dist/pdf/*.pdf`) have been generated:
 
-          | # | Dummy Character | Class / Subclass | Pages | Source | Compiled PDF |
-          | :-: | :--- | :--- | :-: | :--- | :--- |
-          | **01** | **Seraphina Vale** | Paladin (Oath of Devotion 6) / Warlock (The Celestial 2) | 3 | `character.typ` | `dist/pdf/seraphina_paladin_warlock.pdf` |
-          | **02** | **Kaelen "Whisper" Vane** | Rogue (Arcane Trickster 7) | 3 | `examples/kaelen_rogue.typ` | `dist/pdf/kaelen_rogue.pdf` |
-          | **03** | **Thokk "Ironhide" Grimjaw** | Barbarian (Path of the Totem Warrior 5) | 2 | `examples/thokk_barbarian.typ` | `dist/pdf/thokk_barbarian.pdf` |
+          | # | Dummy Character | Class / Subclass | Pages | Source | Card HTML Page | Compiled PDF |
+          | :-: | :--- | :--- | :-: | :--- | :--- | :--- |
+          | **01** | **Seraphina Vale** | Paladin (Oath of Devotion 6) / Warlock (The Celestial 2) | 3 | `character.typ` | `/seraphina.html` · `/cards/seraphina.html` | `dist/pdf/seraphina_paladin_warlock.pdf` |
+          | **02** | **Kaelen "Whisper" Vane** | Rogue (Arcane Trickster 7) | 3 | `examples/kaelen_rogue.typ` | `/kaelen_rogue.html` · `/cards/kaelen_rogue.html` | `dist/pdf/kaelen_rogue.pdf` |
+          | **03** | **Thokk "Ironhide" Grimjaw** | Barbarian (Path of the Totem Warrior 5) | 2 | `examples/thokk_barbarian.typ` | `/thokk_barbarian.html` · `/cards/thokk_barbarian.html` | `dist/pdf/thokk_barbarian.pdf` |
 
-          > **Download the `character-sheet-preview-site` artifact** from this workflow run and open `index.html` to browse the interactive preview page.
+          > **Download the `character-sheet-preview-site` artifact** from this workflow run and open `index.html` (or any `<card_name>.html` / `cards/<card_name>.html`) to browse the interactive preview page.
           EOF
 
-      - name: Check if GitHub Pages is enabled
-        id: check_pages
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if gh api "repos/${GITHUB_REPOSITORY}/pages" >/dev/null 2>&1; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Upload GitHub Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.check_pages.outputs.enabled == 'true'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist/
@@ -86,7 +72,7 @@ jobs:
   deploy-pages:
     name: Deploy Preview Page to GitHub Pages
     needs: build-preview
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build-preview.outputs.pages_enabled == 'true'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -95,3 +81,16 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Publish Live GitHub Pages Card URLs to Summary
+        run: |
+          BASE_URL="${{ steps.deployment.outputs.page_url }}"
+          BASE_URL="${BASE_URL%/}"
+          cat << EOF >> "$GITHUB_STEP_SUMMARY"
+          ## Deployed Character Card Pages 🌐
+
+          - **Gallery Index**: ${BASE_URL}/
+          - **Seraphina Vale**: ${BASE_URL}/seraphina.html (${BASE_URL}/cards/seraphina.html)
+          - **Kaelen "Whisper" Vane**: ${BASE_URL}/kaelen_rogue.html (${BASE_URL}/cards/kaelen_rogue.html)
+          - **Thokk "Ironhide" Grimjaw**: ${BASE_URL}/thokk_barbarian.html (${BASE_URL}/cards/thokk_barbarian.html)
+          EOF

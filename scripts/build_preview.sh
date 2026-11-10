@@ -362,6 +362,7 @@ ${badges_html}
           </div>
         </div>
         <div class="action-group">
+          <a class="btn-card-link" href="${asset_prefix}cards/${active_slug}.html">Open Card (Frameless)</a>
           <a class="btn-download" href="${asset_prefix}pdf/${pdf_file}" target="_blank" rel="noopener">Download PDF (${page_count} Pages)</a>
         </div>
       </div>
@@ -390,7 +391,7 @@ ${grid_html}
 CARD_EOF
 }
 
-echo "==> Generating standalone character card pages (<domain>/<card>.html and <domain>/cards/<card>.html)..."
+echo "==> Generating standalone character card pages (<domain>/<card>.html)..."
 
 SERAPHINA_BADGES='            <span class="badge">Level 8 (Prof +3)</span>
             <span class="badge">AC 20 (Auto)</span>
@@ -410,7 +411,7 @@ THOKK_BADGES='            <span class="badge">Level 5 (Prof +3)</span>
             <span class="badge">2-Page Martial Sheet</span>
             <span class="badge">Source: examples/thokk_barbarian.typ</span>'
 
-# 1. Seraphina Vale standalone pages (root & /cards/)
+# 1. Seraphina Vale standalone pages (root)
 for name in seraphina seraphina_paladin_warlock character; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
@@ -423,21 +424,9 @@ for name in seraphina seraphina_paladin_warlock character; do
     "seraphina_page_" \
     "3" \
     "Seraphina Vale"
-
-  generate_card_page \
-    "${DIST_DIR}/cards/${name}.html" \
-    "../" \
-    "seraphina" \
-    "Seraphina Vale — Half-Elf Paladin (Oath of Devotion 6) / Warlock (The Celestial 2)" \
-    "Demonstrates multiclass level &amp; Hit Dice aggregation (6d10 + 2d8), Aura of Protection (+4 global saving throw bonus), Half Plate + Shield + Defense Style (AC 20), and simultaneous Half-Caster + Warlock Pact Magic slot matrices." \
-    "${SERAPHINA_BADGES}" \
-    "seraphina_paladin_warlock.pdf" \
-    "seraphina_page_" \
-    "3" \
-    "Seraphina Vale"
 done
 
-# 2. Kaelen Vane standalone pages (root & /cards/)
+# 2. Kaelen Vane standalone pages (root)
 for name in kaelen_rogue kaelen; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
@@ -450,37 +439,13 @@ for name in kaelen_rogue kaelen; do
     "kaelen_page_" \
     "3" \
     "Kaelen Vane"
-
-  generate_card_page \
-    "${DIST_DIR}/cards/${name}.html" \
-    "../" \
-    "kaelen_rogue" \
-    "Kaelen &quot;Whisper&quot; Vane — Variant Human Rogue (Arcane Trickster 7)" \
-    "Demonstrates Third-Caster progression (Caster Level 3 &rarr; 4&times;1st, 2&times;2nd slots), 4&times; Skill Expertise (Stealth +11, Sleight of Hand +11, Investigation +9, Perception +7), Observant (+5 Passives) &amp; Alert (+5 Initiative) feats, and Finesse DEX attack automation." \
-    "${KAELEN_BADGES}" \
-    "kaelen_rogue.pdf" \
-    "kaelen_page_" \
-    "3" \
-    "Kaelen Vane"
 done
 
-# 3. Thokk Grimjaw standalone pages (root & /cards/)
+# 3. Thokk Grimjaw standalone pages (root)
 for name in thokk_barbarian thokk; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
     "" \
-    "thokk_barbarian" \
-    "Thokk &quot;Ironhide&quot; Grimjaw — Half-Orc Barbarian (Path of the Totem Warrior 5)" \
-    "Demonstrates non-caster auto-detection (automatically omits Page 3), Barbarian Unarmored Defense (10 + DEX + CON + Shield = AC 18), Tough feat HP calculation (+2 HP/lvl &rarr; 70 Max HP), and 2&times; carrying capacity (540 lb)." \
-    "${THOKK_BADGES}" \
-    "thokk_barbarian.pdf" \
-    "thokk_page_" \
-    "2" \
-    "Thokk Grimjaw"
-
-  generate_card_page \
-    "${DIST_DIR}/cards/${name}.html" \
-    "../" \
     "thokk_barbarian" \
     "Thokk &quot;Ironhide&quot; Grimjaw — Half-Orc Barbarian (Path of the Totem Warrior 5)" \
     "Demonstrates non-caster auto-detection (automatically omits Page 3), Barbarian Unarmored Defense (10 + DEX + CON + Shield = AC 18), Tough feat HP calculation (+2 HP/lvl &rarr; 70 Max HP), and 2&times; carrying capacity (540 lb)." \
@@ -519,20 +484,11 @@ for typ_file in "${ROOT_DIR}"/cards/*.typ "${ROOT_DIR}"/examples/*.typ; do
     "${base}_page_" \
     "${pages}" \
     "${base}"
-
-  generate_card_page \
-    "${DIST_DIR}/cards/${base}.html" \
-    "../" \
-    "${base}" \
-    "${base}" \
-    "Custom D&amp;D 5e character card compiled from ${typ_file#${ROOT_DIR}/}." \
-    "${CUSTOM_BADGES}" \
-    "${base}.pdf" \
-    "${base}_page_" \
-    "${pages}" \
-    "${base}"
 done
 shopt -u nullglob
+
+echo "==> Compiling standalone frameless HTML cards [cards/*.html and dist/cards/*.html]..."
+python3 "${ROOT_DIR}/scripts/compile_card_html.py"
 
 echo "==> Generating interactive HTML preview gallery [dist/index.html & dist/cards/index.html]..."
 cat > "${DIST_DIR}/index.html" << EOF

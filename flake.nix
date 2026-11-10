@@ -188,7 +188,7 @@
               python3
               miniserve
               watchexec
-              poppler_utils
+              poppler-utils
               buildPreviewHelper
               previewCardHelper
               watchCardHelper

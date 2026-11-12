@@ -6,7 +6,7 @@ A clean, modern minimalist, printer-friendly 3-page **Dungeons & Dragons 5th Edi
 
 ### Local Preview with Nix Flake
 
-A [`flake.nix`](flake.nix) is included with `typst`, all required sheet fonts (`Roboto`, `Libertinus Serif`, `Liberation Sans/Serif/Mono`, `DejaVu Sans/Serif/Mono`), and local preview server helpers:
+A [`flake.nix`](flake.nix) is included with `typst`, all required sheet fonts (`Roboto`, `Libertinus Serif`, `Liberation Sans/Serif/Mono`, `DejaVu Sans/Serif/Mono`, `Noto Sans/Serif CJK SC`), and local preview server helpers:
 
 ```bash
 # Build all character cards and launch a local HTTP preview server at http://localhost:8000

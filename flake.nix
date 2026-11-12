@@ -24,6 +24,8 @@
             libertinus
             liberation_ttf
             dejavu_fonts
+            noto-fonts-cjk-sans
+            noto-fonts-cjk-serif
           ];
           fontPath = pkgs.lib.makeSearchPath "share/fonts" fontPackages;
         in

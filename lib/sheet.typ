@@ -30,9 +30,9 @@
 )
 
 // Typography helpers
-#let font-sans = ("Roboto", "Liberation Sans", "DejaVu Sans")
-#let font-serif = ("Libertinus Serif", "Liberation Serif", "DejaVu Serif")
-#let font-mono = ("DejaVu Sans Mono", "Liberation Mono")
+#let font-sans = ("Roboto", "Liberation Sans", "DejaVu Sans", "Noto Sans CJK SC")
+#let font-serif = ("Libertinus Serif", "Liberation Serif", "DejaVu Serif", "Noto Serif CJK SC")
+#let font-mono = ("DejaVu Sans Mono", "Liberation Mono", "Noto Sans Mono CJK SC")
 
 #let label-text(body, size: 6.5pt, color: palette.slate, tracking: 0.6pt) = {
   text(

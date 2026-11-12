@@ -21,14 +21,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Fonts (Roboto, Liberation, DejaVu, Libertinus)
+      - name: Install Fonts (Roboto, Liberation, DejaVu, Libertinus, Noto CJK)
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             fonts-roboto \
             fonts-liberation2 \
             fonts-dejavu-core \
-            fonts-linuxlibertine
+            fonts-linuxlibertine \
+            fonts-noto-cjk
 
       - name: Setup Typst
         uses: typst-community/setup-typst@v4

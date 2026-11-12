@@ -1124,17 +1124,17 @@ html, body {
   min-height: 100vh;
 }
 .card-page-wrapper {
-  width: 533pt;
+  width: min(900px, 96vw);
   max-width: 100%;
   background: #ffffff;
   border: none;
   box-shadow: none;
   margin: 0 auto;
 }
-.card-page-wrapper svg.typst-doc {
+.card-page-wrapper svg {
   display: block;
-  width: 100%;
-  height: auto;
+  width: 100% !important;
+  height: auto !important;
 }
 @media print {
   html, body, .card-root {

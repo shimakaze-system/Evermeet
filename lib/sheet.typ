@@ -1087,26 +1087,11 @@
 // ============================================================================
 #let character-sheet(data, paper: "a4") = {
   let c = evaluate-character(data)
+  let is-html = sys.inputs.at("target", default: "") == "html"
 
   set document(
     title: c.name + " — D&D 5e Character Sheet",
     author: c.player,
-  )
-
-  set page(
-    paper: paper,
-    margin: (x: 11mm, top: 10mm, bottom: 11mm),
-    footer: context {
-      let pg = counter(page).get().first()
-      let total = counter(page).final().first()
-      grid(
-        columns: (1fr, auto, 1fr),
-        align: (left + horizon, center + horizon, right + horizon),
-        text(font: font-mono, size: 6.2pt, fill: palette.slate, "EVERMEET 5E AUTOMATED CHARACTER SHEET"),
-        text(font: font-sans, size: 6.5pt, weight: "bold", fill: palette.charcoal, c.name + " (" + c.class_summary + ")"),
-        text(font: font-mono, size: 6.2pt, fill: palette.slate, "PAGE " + str(pg) + " OF " + str(total)),
-      )
-    },
   )
 
   set text(
@@ -1115,16 +1100,96 @@
     fill: palette.ink,
   )
 
-  // Page 1: Core Attributes, Skills & Combat
-  render-page-one(c)
-
-  // Page 2: Features, Inventory, Encumbrance & Lore
-  pagebreak()
-  render-page-two(c)
-
-  // Page 3: Spellcasting (automatically rendered when the character has spells/caster levels)
-  if c.spellcasting.enabled {
-    pagebreak()
-    render-page-three(c)
+  if is-html {
+    html.elem("style", "
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #ffffff;
+  color: #121212;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.card-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 24px;
+  padding: 24px 0;
+  background-color: #ffffff;
+  min-height: 100vh;
+}
+.card-page-wrapper {
+  width: 533pt;
+  max-width: 100%;
+  background: #ffffff;
+  border: none;
+  box-shadow: none;
+  margin: 0 auto;
+}
+.card-page-wrapper svg.typst-doc {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+@media print {
+  html, body, .card-root {
+    background: #ffffff !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+  .card-page-wrapper {
+    width: 100% !important;
+    max-width: none !important;
+    page-break-after: always;
+    break-after: page;
+  }
+  .card-page-wrapper:last-child {
+    page-break-after: auto;
+    break-after: auto;
   }
 }
+")
+    html.elem("div", attrs: (class: "card-root"), {
+      html.elem("div", attrs: (class: "card-page-wrapper"), html.frame(block(width: 533pt, render-page-one(c))))
+      html.elem("div", attrs: (class: "card-page-wrapper"), html.frame(block(width: 533pt, render-page-two(c))))
+      if c.spellcasting.enabled {
+        html.elem("div", attrs: (class: "card-page-wrapper"), html.frame(block(width: 533pt, render-page-three(c))))
+      }
+    })
+  } else {
+    set page(
+      paper: paper,
+      margin: (x: 11mm, top: 10mm, bottom: 11mm),
+      footer: context {
+        let pg = counter(page).get().first()
+        let total = counter(page).final().first()
+        grid(
+          columns: (1fr, auto, 1fr),
+          align: (left + horizon, center + horizon, right + horizon),
+          text(font: font-mono, size: 6.2pt, fill: palette.slate, "EVERMEET 5E AUTOMATED CHARACTER SHEET"),
+          text(font: font-sans, size: 6.5pt, weight: "bold", fill: palette.charcoal, c.name + " (" + c.class_summary + ")"),
+          text(font: font-mono, size: 6.2pt, fill: palette.slate, "PAGE " + str(pg) + " OF " + str(total)),
+        )
+      },
+    )
+
+    // Page 1: Core Attributes, Skills & Combat
+    render-page-one(c)
+
+    // Page 2: Features, Inventory, Encumbrance & Lore
+    pagebreak()
+    render-page-two(c)
+
+    // Page 3: Spellcasting (automatically rendered when the character has spells/caster levels)
+    if c.spellcasting.enabled {
+      pagebreak()
+      render-page-three(c)
+    }
+  }
+}
+

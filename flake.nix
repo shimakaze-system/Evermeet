@@ -102,14 +102,15 @@
               gnused
               typst
               python3
+              watchexec
             ];
             text = ''
               export TYPST_FONT_PATHS="${fontPath}''${TYPST_FONT_PATHS:+:$TYPST_FONT_PATHS}"
-              PORT="''${PORT:-8000}"
+              PORT="''${1:-''${PORT:-8000}}"
               ./scripts/build_preview.sh
               echo ""
               echo "=================================================================="
-              echo "Evermeet Local Card Preview Server"
+              echo "Evermeet Local Card Preview Server (Auto-Rebuild Enabled)"
               echo "------------------------------------------------------------------"
               echo "  Gallery Index : http://localhost:''${PORT}/"
               echo "  Card Pages    :"
@@ -120,8 +121,16 @@
               echo "    - http://localhost:''${PORT}/cards/kaelen_rogue.html"
               echo "    - http://localhost:''${PORT}/cards/thokk_barbarian.html"
               echo "=================================================================="
-              echo "Press Ctrl+C to stop the preview server."
-              exec python3 -m http.server "''${PORT}" --directory dist
+              echo "Watching *.typ and *.sh for changes. Press Ctrl+C to stop."
+              python3 -m http.server "''${PORT}" --directory dist &
+              SERVER_PID=$!
+              trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT INT TERM
+              watchexec \
+                --postpone \
+                --ignore dist \
+                --ignore .git \
+                -e typ,sh \
+                -- ./scripts/build_preview.sh
             '';
           };
         in
@@ -164,12 +173,21 @@
             PORT="''${1:-''${PORT:-8000}}"
             ./scripts/build_preview.sh
             echo ""
-            echo "Serving character cards at http://localhost:''${PORT}/"
+            echo "Serving character cards at http://localhost:''${PORT}/ (auto-rebuild enabled)"
             echo "  - http://localhost:''${PORT}/index.html"
             echo "  - http://localhost:''${PORT}/seraphina.html        (or /cards/seraphina.html)"
             echo "  - http://localhost:''${PORT}/kaelen_rogue.html     (or /cards/kaelen_rogue.html)"
             echo "  - http://localhost:''${PORT}/thokk_barbarian.html  (or /cards/thokk_barbarian.html)"
-            exec ${pkgs.python3}/bin/python3 -m http.server "''${PORT}" --directory dist
+            echo "Watching *.typ and *.sh for changes. Press Ctrl+C to stop."
+            ${pkgs.python3}/bin/python3 -m http.server "''${PORT}" --directory dist &
+            SERVER_PID=$!
+            trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT INT TERM
+            ${pkgs.watchexec}/bin/watchexec \
+              --postpone \
+              --ignore dist \
+              --ignore .git \
+              -e typ,sh \
+              -- ./scripts/build_preview.sh
           '';
 
           watchCardHelper = pkgs.writeShellScriptBin "watch-card" ''
@@ -203,7 +221,7 @@
               echo "Evermeet Typst Character Card DevShell loaded."
               echo "Commands available:"
               echo "  build-preview              Compile all character cards & HTML pages into dist/"
-              echo "  preview-card [port]        Build & serve dist/ locally (default: http://localhost:8000)"
+              echo "  preview-card [port]        Build, serve dist/ locally, and auto-rebuild on file changes (default: http://localhost:8000)"
               echo "  watch-card [file.typ]      Live-compile a single character card PDF with typst watch"
             '';
           };

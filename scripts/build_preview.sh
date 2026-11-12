@@ -17,6 +17,8 @@
 
 set -euo pipefail
 
+export PATH="${HOME}/.local/bin:${PATH}"
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
 
@@ -411,7 +413,7 @@ THOKK_BADGES='            <span class="badge">Level 5 (Prof +3)</span>
             <span class="badge">2-Page Martial Sheet</span>
             <span class="badge">Source: examples/thokk_barbarian.typ</span>'
 
-# 1. Seraphina Vale standalone pages (root)
+# 1. Seraphina Vale standalone preview pages (root)
 for name in seraphina seraphina_paladin_warlock character; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
@@ -426,7 +428,7 @@ for name in seraphina seraphina_paladin_warlock character; do
     "Seraphina Vale"
 done
 
-# 2. Kaelen Vane standalone pages (root)
+# 2. Kaelen Vane standalone preview pages (root)
 for name in kaelen_rogue kaelen; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
@@ -441,7 +443,7 @@ for name in kaelen_rogue kaelen; do
     "Kaelen Vane"
 done
 
-# 3. Thokk Grimjaw standalone pages (root)
+# 3. Thokk Grimjaw standalone preview pages (root)
 for name in thokk_barbarian thokk; do
   generate_card_page \
     "${DIST_DIR}/${name}.html" \
@@ -487,8 +489,24 @@ for typ_file in "${ROOT_DIR}"/cards/*.typ "${ROOT_DIR}"/examples/*.typ; do
 done
 shopt -u nullglob
 
-echo "==> Compiling standalone frameless HTML cards [cards/*.html and dist/cards/*.html]..."
-python3 "${ROOT_DIR}/scripts/compile_card_html.py"
+echo "==> Compiling standalone frameless HTML cards using native Typst HTML export [cards/*.html and dist/cards/*.html]..."
+mkdir -p "${ROOT_DIR}/cards" "${DIST_DIR}/cards"
+
+typst compile --features html --input target=html --root "${ROOT_DIR}" "${ROOT_DIR}/character.typ" "${ROOT_DIR}/cards/character.html"
+cp "${ROOT_DIR}/cards/character.html" "${ROOT_DIR}/cards/seraphina.html"
+cp "${ROOT_DIR}/cards/character.html" "${ROOT_DIR}/cards/seraphina_paladin_warlock.html"
+
+cp "${ROOT_DIR}/cards/character.html" "${DIST_DIR}/cards/character.html"
+cp "${ROOT_DIR}/cards/character.html" "${DIST_DIR}/cards/seraphina.html"
+cp "${ROOT_DIR}/cards/character.html" "${DIST_DIR}/cards/seraphina_paladin_warlock.html"
+
+shopt -s nullglob
+for typ_file in "${ROOT_DIR}/examples"/*.typ "${ROOT_DIR}/cards"/*.typ; do
+  base="$(basename "${typ_file}" .typ)"
+  typst compile --features html --input target=html --root "${ROOT_DIR}" "${typ_file}" "${ROOT_DIR}/cards/${base}.html"
+  cp "${ROOT_DIR}/cards/${base}.html" "${DIST_DIR}/cards/${base}.html"
+done
+shopt -u nullglob
 
 echo "==> Generating interactive HTML preview gallery [dist/index.html & dist/cards/index.html]..."
 cat > "${DIST_DIR}/index.html" << EOF

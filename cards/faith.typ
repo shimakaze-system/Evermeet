@@ -1,4 +1,13 @@
-#import "../lib/sheet.typ": character-sheet // Use "../lib/sheet.typ" if inside examples/
+#import "../lib/sheet.typ": character-sheet
+#import "@preview/cuti:0.2.1": show-cn-fakebold
+#show: show-cn-fakebold
+
+#set text(
+  lang: "zh",
+  region: "cn",
+  size: 10.5pt,
+  cjk-latin-spacing: auto,
+)
 
 #let character = (
   // 1. Identity & Class

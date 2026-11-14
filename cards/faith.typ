@@ -192,7 +192,7 @@
       (name: "材料包", qty: 1, weight: 2, equipped: true, notes: "施法材料"),
       (name: "盗贼工具", qty: 1, weight: 1, equipped: false),
       (name: "探索套组", qty: 1, weight: 10, equipped: false),
-      (name: "署名为渡鸦女王的语焉不详的密信", qty: 1, weight: 0, equipped:false, notes: "清理掉那个……。渡鸦女王"),
+      (name: "署名为渡鸦女王的语焉不详的密信", qty: 1, weight: 0, equipped:false, notes: "迷雾中的鸦群忘记了古老的赠礼。去寻回吧，连同你曾遗落的那些。—鸦后"),
       (name: "发条护符 Clockwork Amulet", qty: 1, weight: 0, equipped: true, notes: "奇物，普通。这枚铜制的护符内有数个互相咬合的微小齿轮，其以机械境——一个秩序至极，万物皆可被机械预测的位面——的魔法所驱动。模糊的滴答声与呼呼的噪音从中传出。佩戴该护符期间，当你进行一次攻击检定时，你可以放弃掷骰并在d20的骰值上取10。该词条一经使用，直至下个黎明前都无法再次使用。"),
     ),
   ),
